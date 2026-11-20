@@ -40,6 +40,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -57,13 +58,22 @@ public class BruteForce extends BasicActivity {
 
     private static final String LOG_TAG = BruteForce.class.getSimpleName();
 
+    private static final int SECTOR_MODE_ALL = 0;
+    private static final int SECTOR_MODE_RANGE = 1;
+    private static final int SECTOR_MODE_PICK = 2;
+
     private RadioGroup mKeyTypeGroup;
     private AppCompatEditText mKeyRangeFrom;
     private AppCompatEditText mKeyRangeTo;
-    private AppCompatCheckBox mAllSectors;
-    private LinearLayout mSectorLayout;
+    private RadioGroup mSectorModeGroup;
+    private LinearLayout mSectorRangeLayout;
+    private LinearLayout mSectorPickLayout;
+    private final AppCompatCheckBox[] mSectorChecks = new AppCompatCheckBox[40];
     private AppCompatEditText mSectorFrom;
     private AppCompatEditText mSectorTo;
+    private int mSectorMode = SECTOR_MODE_ALL;
+    private int[] mSelectedSectors;
+    private int mSectorTotal;
     private Button mStart;
     private Button mCancel;
     private ProgressBar mProgressBar;
@@ -88,26 +98,67 @@ public class BruteForce extends BasicActivity {
         mKeyTypeGroup = findViewById(R.id.radioGroupBruteForceKeyType);
         mKeyRangeFrom = findViewById(R.id.editTextBruteForceKeyRangeFrom);
         mKeyRangeTo = findViewById(R.id.editTextBruteForceKeyRangeTo);
-        mAllSectors = findViewById(R.id.checkBoxBruteForceAllSectors);
-        mSectorLayout = findViewById(R.id.linearLayoutBruteForceSectors);
+        mSectorModeGroup = findViewById(R.id.radioGroupBruteForceSectorMode);
+        mSectorRangeLayout = findViewById(R.id.linearLayoutBruteForceSectorRange);
+        mSectorPickLayout = findViewById(R.id.linearLayoutBruteForceSectorPick);
         mSectorFrom = findViewById(R.id.editTextBruteForceSectorFrom);
         mSectorTo = findViewById(R.id.editTextBruteForceSectorTo);
+        for (int row = 0; row < 5; row++) {
+            LinearLayout rowLayout = new LinearLayout(this);
+            rowLayout.setOrientation(LinearLayout.HORIZONTAL);
+            for (int col = 0; col < 8; col++) {
+                int sector = row * 8 + col;
+                AppCompatCheckBox checkBox = new AppCompatCheckBox(this);
+                checkBox.setText(String.valueOf(sector));
+                LinearLayout.LayoutParams params =
+                        new LinearLayout.LayoutParams(
+                                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                rowLayout.addView(checkBox, params);
+                mSectorChecks[sector] = checkBox;
+            }
+            mSectorPickLayout.addView(rowLayout);
+        }
         mStart = findViewById(R.id.buttonBruteForceStart);
         mCancel = findViewById(R.id.buttonBruteForceCancel);
         mProgressBar = findViewById(R.id.progressBarBruteForce);
         mStatus = findViewById(R.id.textViewBruteForceStatus);
 
-        mAllSectors.setChecked(true);
-        mSectorLayout.setVisibility(View.GONE);
-        mSectorFrom.setEnabled(false);
-        mSectorTo.setEnabled(false);
+        mSectorModeGroup.clearCheck();
+        ((android.widget.RadioButton) findViewById(
+                R.id.radioButtonBruteForceSectorAll)).setChecked(true);
+        onSectorModeChanged(null);
     }
 
-    public void onAllSectorsChanged(View view) {
-        boolean all = mAllSectors.isChecked();
-        mSectorLayout.setVisibility(all ? View.GONE : View.VISIBLE);
-        mSectorFrom.setEnabled(!all);
-        mSectorTo.setEnabled(!all);
+    public void onSectorModeChanged(View view) {
+        mSectorMode = getSectorMode();
+        mSectorRangeLayout.setVisibility(
+                mSectorMode == SECTOR_MODE_RANGE ? View.VISIBLE : View.GONE);
+        mSectorPickLayout.setVisibility(
+                mSectorMode == SECTOR_MODE_PICK ? View.VISIBLE : View.GONE);
+        mSectorFrom.setEnabled(mSectorMode == SECTOR_MODE_RANGE);
+        mSectorTo.setEnabled(mSectorMode == SECTOR_MODE_RANGE);
+    }
+
+    private int getSectorMode() {
+        int id = mSectorModeGroup.getCheckedRadioButtonId();
+        if (id == R.id.radioButtonBruteForceSectorRange) {
+            return SECTOR_MODE_RANGE;
+        }
+        if (id == R.id.radioButtonBruteForceSectorPick) {
+            return SECTOR_MODE_PICK;
+        }
+        return SECTOR_MODE_ALL;
+    }
+
+    private int[] collectCheckedSectors() {
+        int[] sectors = new int[mSectorChecks.length];
+        int count = 0;
+        for (int i = 0; i < mSectorChecks.length; i++) {
+            if (mSectorChecks[i].isChecked()) {
+                sectors[count++] = i;
+            }
+        }
+        return Arrays.copyOf(sectors, count);
     }
 
     private int getSelectedKeyMapAuthMode() {
@@ -134,7 +185,9 @@ public class BruteForce extends BasicActivity {
             return;
         }
 
-        if (!mAllSectors.isChecked()) {
+        mSectorMode = getSectorMode();
+        mSelectedSectors = null;
+        if (mSectorMode == SECTOR_MODE_RANGE) {
             int from = parseSectorLocal(mSectorFrom.getText().toString());
             int to = parseSectorLocal(mSectorTo.getText().toString());
             if (from < 0 || to < from) {
@@ -144,6 +197,15 @@ public class BruteForce extends BasicActivity {
             }
             mFirstSector = from;
             mLastSector = to;
+        } else if (mSectorMode == SECTOR_MODE_PICK) {
+            mSelectedSectors = collectCheckedSectors();
+            if (mSelectedSectors.length == 0) {
+                Toast.makeText(this, R.string.info_invalid_sector_range,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            mFirstSector = mSelectedSectors[0];
+            mLastSector = mSelectedSectors[mSelectedSectors.length - 1];
         } else {
             mFirstSector = 0;
             mLastSector = -1;
@@ -209,27 +271,54 @@ public class BruteForce extends BasicActivity {
             reader.close();
             return;
         }
-        if (mAllSectors.isChecked()) {
+        int sectorCount = reader.getSectorCount();
+        if (mSectorMode == SECTOR_MODE_ALL) {
             mFirstSector = 0;
-            mLastSector = reader.getSectorCount() - 1;
-        } else if (mFirstSector < 0 || mLastSector < mFirstSector
-                || mLastSector >= reader.getSectorCount()) {
-            Toast.makeText(this, R.string.info_invalid_sector_range,
-                    Toast.LENGTH_LONG).show();
-            reader.close();
-            return;
-        }
-        if (!reader.setMappingRange(mFirstSector, mLastSector)) {
-            Toast.makeText(this, R.string.info_mapping_sector_out_of_range,
-                    Toast.LENGTH_LONG).show();
-            reader.close();
-            return;
+            mLastSector = sectorCount - 1;
+            mSectorTotal = sectorCount;
+            if (!reader.setMappingRange(mFirstSector, mLastSector)) {
+                Toast.makeText(this, R.string.info_mapping_sector_out_of_range,
+                        Toast.LENGTH_LONG).show();
+                reader.close();
+                return;
+            }
+        } else if (mSectorMode == SECTOR_MODE_RANGE) {
+            if (mFirstSector < 0 || mLastSector < mFirstSector
+                    || mLastSector >= sectorCount) {
+                Toast.makeText(this, R.string.info_invalid_sector_range,
+                        Toast.LENGTH_LONG).show();
+                reader.close();
+                return;
+            }
+            mSectorTotal = mLastSector - mFirstSector + 1;
+            if (!reader.setMappingRange(mFirstSector, mLastSector)) {
+                Toast.makeText(this, R.string.info_mapping_sector_out_of_range,
+                        Toast.LENGTH_LONG).show();
+                reader.close();
+                return;
+            }
+        } else {
+            for (int sector : mSelectedSectors) {
+                if (sector < 0 || sector >= sectorCount) {
+                    Toast.makeText(this, R.string.info_invalid_sector_range,
+                            Toast.LENGTH_LONG).show();
+                    reader.close();
+                    return;
+                }
+            }
+            mSectorTotal = mSelectedSectors.length;
+            if (!reader.setMappingSectors(mSelectedSectors)) {
+                Toast.makeText(this, R.string.info_mapping_sector_out_of_range,
+                        Toast.LENGTH_LONG).show();
+                reader.close();
+                return;
+            }
         }
 
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mProgressStatus = -1;
-        mProgressBar.setMax((mLastSector - mFirstSector) + 1);
+        mProgressBar.setMax(mSectorTotal);
         mProgressBar.setProgress(0);
         mStatus.setText(R.string.info_brute_force_running);
         mStart.setEnabled(false);
@@ -239,12 +328,14 @@ public class BruteForce extends BasicActivity {
 
     private void createBruteForceKeyMap(final MCReader reader) {
         new Thread(() -> {
+            int completed = 0;
             while (mProgressStatus < mLastSector) {
                 mProgressStatus = reader.buildNextKeyMapPart();
                 if (mProgressStatus == -1 || !mIsRunning) {
                     break;
                 }
-                final int progress = (mProgressStatus - mFirstSector) + 1;
+                completed++;
+                final int progress = completed;
                 mHandler.post(() -> mProgressBar.setProgress(progress));
             }
             mHandler.post(() -> finishBruteForce(reader));

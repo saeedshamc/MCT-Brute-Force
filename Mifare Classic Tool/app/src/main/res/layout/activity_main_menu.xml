@@ -52,6 +52,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/read_tag"
                     android:onClick="onShowReadTag"
                     android:text="@string/action_read_tag" />
@@ -61,6 +62,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/write_tag"
                     android:onClick="onShowWriteTag"
                     android:text="@string/action_write_tag" />
@@ -77,6 +79,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/edit_dump"
                     android:onClick="onOpenTagDumpEditor"
                     android:text="@string/action_edit_tag_dump" />
@@ -86,6 +89,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/edit_keys"
                     android:onClick="onOpenKeyEditor"
                     android:text="@string/action_edit_key_dump" />
@@ -102,6 +106,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/tools"
                     android:onClick="onShowTools"
                     android:text="@string/action_tools" />
@@ -111,6 +116,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/help_and_info"
                     android:onClick="onShowHelp"
                     android:text="@string/action_help" />
@@ -126,6 +132,7 @@
                     android:id="@+id/buttonMainBruteForce"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:textSize="16sp"
                     android:drawableTop="@drawable/random"
                     android:onClick="onShowBruteForce"
                     android:text="@string/action_show_brute_force" />

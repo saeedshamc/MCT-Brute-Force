@@ -76,6 +76,8 @@ public class MCReader {
     private int mKeyMapStatus = 0;
     private int mLastSector = -1;
     private int mFirstSector = 0;
+    private int[] mMappingSectorList = null;
+    private int mMappingSectorIndex = 0;
     private ArrayList<String> mKeysWithOrder;
     private int mKeyMapAuthMode = KEY_MAP_MODE_BOTH;
     private boolean mUseKeyRange = false;
@@ -485,7 +487,14 @@ public class MCReader {
         cancelCreateKeyMap = false;
         boolean hasKeyCandidates = mUseKeyRange || mKeysWithOrder != null;
         if (hasKeyCandidates && mLastSector != -1) {
-            if (mKeyMapStatus == mLastSector+1) {
+            if (mMappingSectorList != null) {
+                if (mMappingSectorIndex >= mMappingSectorList.length) {
+                    mMappingSectorIndex = 0;
+                    mKeyMap = new SparseArray<>();
+                }
+                mKeyMapStatus = mMappingSectorList[mMappingSectorIndex];
+                mMappingSectorIndex++;
+            } else if (mKeyMapStatus == mLastSector+1) {
                 mKeyMapStatus = mFirstSector;
                 mKeyMap = new SparseArray<>();
             }
@@ -611,7 +620,11 @@ public class MCReader {
                     }
                 }
             }
-            mKeyMapStatus++;
+            if (mMappingSectorList != null) {
+                mKeyMapStatus = mMappingSectorList[mMappingSectorIndex - 1] + 1;
+            } else {
+                mKeyMapStatus++;
+            }
         } else {
             error = true;
         }
@@ -1037,6 +1050,7 @@ public class MCReader {
     public boolean setMappingRange(int firstSector, int lastSector) {
         if (firstSector >= 0 && lastSector < getSectorCount()
                 && firstSector <= lastSector) {
+            mMappingSectorList = null;
             mFirstSector = firstSector;
             mLastSector = lastSector;
             // Init. status of buildNextKeyMapPart to create a new key map.
@@ -1044,6 +1058,32 @@ public class MCReader {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Set an arbitrary list of sectors for {@link #buildNextKeyMapPart()}.
+     * The sectors do not need to be contiguous.
+     * @param sectors Sector indices to include in the key map.
+     * @return True if parameters were correct. False otherwise.
+     * @see #setMappingRange(int, int)
+     */
+    public boolean setMappingSectors(int[] sectors) {
+        if (sectors == null || sectors.length == 0) {
+            return false;
+        }
+        int[] sorted = sectors.clone();
+        Arrays.sort(sorted);
+        for (int i = 0; i < sorted.length; i++) {
+            if (sorted[i] < 0 || sorted[i] >= getSectorCount()
+                    || (i > 0 && sorted[i] == sorted[i - 1])) {
+                return false;
+            }
+        }
+        mMappingSectorList = sorted;
+        mMappingSectorIndex = sorted.length;
+        mFirstSector = sorted[0];
+        mLastSector = sorted[sorted.length - 1];
+        return true;
     }
 
     /**
