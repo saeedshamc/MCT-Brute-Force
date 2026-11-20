@@ -783,6 +783,17 @@ public class MainMenu extends AppCompatActivity {
     }
 
     /**
+     * Show the {@link BruteForce}.
+     * @param view The View object that triggered the method
+     * (in this case the brute force button).
+     * @see BruteForce
+     */
+    public void onShowBruteForce(View view) {
+        Intent intent = new Intent(this, BruteForce.class);
+        startActivity(intent);
+    }
+
+    /**
      * Open a file chooser ({@link FileChooser}). The
      * Activity result will be processed in
      * {@link #onActivityResult(int, int, Intent)}.
@@ -923,10 +934,6 @@ public class MainMenu extends AppCompatActivity {
             return true;
         } else if (id == R.id.menuMainDataConversionTool) {
             intent = new Intent(this, DataConversionTool.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.menuMainBruteForce) {
-            intent = new Intent(this, BruteForce.class);
             startActivity(intent);
             return true;
         }

@@ -38,6 +38,4 @@
         android:title="@string/action_show_uid_log_tool" />
     <item android:id="@+id/menuMainImportExportTool"
         android:title="@string/action_show_import_export_tool" />
-    <item android:id="@+id/menuMainBruteForce"
-        android:title="@string/action_show_brute_force" />
 </menu>
