@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Guide / راهنمای کاربر</title>
+<style>
+  body { font-family: sans-serif; margin: 12px; color: #222; }
+  h1 { font-size: 1.4em; }
+  h2 { font-size: 1.15em; margin-top: 1.4em; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+  h3 { font-size: 1.0em; margin-bottom: 2px; }
+  .langbar { position: sticky; top: 0; background: #fff; padding: 6px 0; z-index: 5; }
+  .langbar button { font-size: 1em; padding: 6px 14px; margin-right: 6px; }
+  .langbar button.active { font-weight: bold; background: #dde; }
+  ol, ul { margin-top: 4px; }
+  .note { background: #fff8e1; border: 1px solid #e0c97a; padding: 6px 8px; margin: 6px 0; border-radius: 4px; }
+  .warn { background: #fdecea; border: 1px solid #e0a49a; padding: 6px 8px; margin: 6px 0; border-radius: 4px; }
+  code { background: #eee; padding: 0 3px; border-radius: 3px; }
+  .fa { display: none; }
+  body.lang-fa .en { display: none; }
+  body.lang-fa .fa { display: block; }
+  body.lang-fa { direction: rtl; text-align: right; }
+  body.lang-en { direction: ltr; text-align: left; }
+  a { color: #1565c0; }
+</style>
+</head>
+<body class="lang-en">
+<div class="langbar">
+  <button id="btnEn" onclick="setLang('en')">English</button>
+  <button id="btnFa" onclick="setLang('fa')">فارسی</button>
+  <span style="float:right"><a id="backLink" href="help.html">← Help and Info / راهنما و اطلاعات</a></span>
+</div>
+
+<h1 class="en">User Guide</h1>
+<h1 class="fa">راهنمای کاربر</h1>
+
+<!-- ================= GENERAL ================= -->
+<h2 class="en">0. General</h2>
+<h2 class="fa">۰. کلیات</h2>
+<div class="en">
+<p>The app works with <b>MIFARE Classic</b> tags via NFC. Hold the tag against the
+back of the phone until the app reacts. All keys and data are hexadecimal.</p>
+<p>If the tag is lost during an operation the app shows an error; just re-tap the
+tag and retry.</p>
+</div>
+<div class="fa">
+<p>این برنامه با تگ‌های <b>MIFARE Classic</b> از طریق NFC کار می‌کند. تگ را تا
+واکنش برنامه به پشت گوشی نزدیک نگه دارید. همه‌ی کلیدها و داده‌ها هگز هستند.</p>
+<p>اگر وسط کار تگ جدا شود برنامه خطا نشان می‌دهد؛ کافی است تگ را دوباره نزدیک
+کنید و تلاش مجدد کنید.</p>
+</div>
+
+<!-- ================= READ TAG ================= -->
+<h2 class="en">1. Read Tag</h2>
+<h2 class="fa">۱. خواندن تگ</h2>
+<div class="en">
+<ol>
+<li>Tap <b>Read Tag</b> on the main screen.</li>
+<li>Hold the tag near the phone.</li>
+<li>The app authenticates each sector with the keys it knows (key files) and reads
+the data blocks.</li>
+<li>Choose a file name and save the dump (<code>.dump</code>) and/or the key map
+(<code>.keys</code>).</li>
+</ol>
+<div class="note">If some sectors stay locked, the app still reads what it can —
+locked blocks appear as <code>---</code> in the dump.</div>
+</div>
+<div class="fa">
+<ol>
+<li>روی صفحه‌ی اصلی <b>خواندن تگ</b> را بزنید.</li>
+<li>تگ را نزدیک گوشی نگه دارید.</li>
+<li>برنامه هر سکتور را با کلیدهایی که می‌شناسد (فایل‌های کلید) احراز و بلوک‌های داده را می‌خواند.</li>
+<li>نام فایل را انتخاب کنید و دامپ (<code>.dump</code>) و/یا نگاشت کلید (<code>.keys</code>) را ذخیره کنید.</li>
+</ol>
+<div class="note">اگر بعضی سکتورها قفل باشند، برنامه آنچه می‌تواند را می‌خواند —
+بلوک‌های قفل به‌صورت <code>---</code> در دامپ دیده می‌شوند.</div>
+</div>
+
+<!-- ================= WRITE TAG ================= -->
+<h2 class="en">2. Write Tag</h2>
+<h2 class="fa">۲. نوشتن روی تگ</h2>
+<div class="en">
+<ol>
+<li>Tap <b>Write Tag</b>, then choose the dump file to write.</li>
+<li>Select the sectors/blocks to write (or write everything).</li>
+<li>Hold the tag near the phone and confirm.</li>
+</ol>
+<div class="warn">Writing wrong data can damage the tag. Blocks containing
+<code>---</code> (unknown data) are skipped automatically.</div>
+<div class="note">"Factory Format" tries to restore the tag to its delivery state.</div>
+</div>
+<div class="fa">
+<ol>
+<li><b>نوشتن روی تگ</b> را بزنید، سپس فایل دامپ موردنظر را انتخاب کنید.</li>
+<li>سکتورها/بلوک‌های موردنظر را انتخاب کنید (یا همه را بنویسید).</li>
+<li>تگ را نزدیک گوشی نگه دارید و تأیید کنید.</li>
+</ol>
+<div class="warn">نوشتن داده‌ی اشتباه می‌تواند به تگ آسیب بزند. بلوک‌های دارای
+<code>---</code> (داده‌ی ناشناخته) به‌صورت خودکار رد می‌شوند.</div>
+<div class="note">«فرمت کارخانه» تلاش می‌کند تگ را به حالت تحویل برگرداند.</div>
+</div>
+
+<!-- ================= DUMP / KEY EDITORS ================= -->
+<h2 class="en">3. Edit Tag Dump &amp; Edit Key File</h2>
+<h2 class="fa">۳. ویرایش دامپ تگ و فایل کلید</h2>
+<div class="en">
+<ul>
+<li><b>Edit/Analyze Dump File</b> — view and edit a <code>.dump</code> offline
+(hex editor per block). Useful to inspect or fix dumps without a tag.</li>
+<li><b>Edit/Add Key File</b> — manage <code>.keys</code> files: add, remove,
+deduplicate keys. These files are used by Read/Write/Brute Force.</li>
+</ul>
+</div>
+<div class="fa">
+<ul>
+<li><b>ویرایش/تحلیل فایل دامپ</b> — مشاهده و ویرایش آفلاین <code>.dump</code>
+(ویرایشگر هگز برای هر بلوک). برای بررسی یا اصلاح دامپ بدون تگ مفید است.</li>
+<li><b>ویرایش/افزودن فایل کلید</b> — مدیریت فایل‌های <code>.keys</code>:
+افزودن، حذف و حذف تکراری‌ها. این فایل‌ها در Read/Write/Brute Force استفاده می‌شوند.</li>
+</ul>
+</div>
+
+<!-- ================= TOOLS ================= -->
+<h2 class="en">4. Tools</h2>
+<h2 class="fa">۴. ابزارها</h2>
+<div class="en">
+<ul>
+<li><b>Tag Info</b> — shows UID, SAK, ATQA, ATS, memory layout and guessed tag type.</li>
+<li><b>Clone UID</b> — clones the UID to "magic tags" (2nd gen) that allow writing
+block 0.</li>
+<li><b>Diff Tool</b> — compares two dumps and highlights differences.</li>
+<li><b>Access Condition Tool</b> — decodes/encodes the access bits of sector
+trailers and data blocks.</li>
+<li><b>Value Block Tool</b> — decodes/encodes value blocks as integers.</li>
+<li><b>BCC Calculator</b> — computes the BCC byte of block 0.</li>
+<li><b>UID Log</b> — history of UIDs seen by the app.</li>
+<li><b>Data Conversion</b> — converts between hex/bin/dec/ASCII.</li>
+<li><b>Import/Export</b> — converts dumps/keys between formats
+(.mct, .keys, .bin/.mfd/.dump, .eml, .json) and backup/restore.</li>
+</ul>
+</div>
+<div class="fa">
+<ul>
+<li><b>اطلاعات تگ</b> — نمایش UID، SAK، ATQA، ATS، ساختار حافظه و نوع حدسی تگ.</li>
+<li><b>Clone UID</b> — کلون UID روی «تگ‌های جادویی» نسل ۲ که اجازه‌ی نوشتن بلوک ۰ می‌دهند.</li>
+<li><b>ابزار Diff</b> — مقایسه‌ی دو دامپ و نمایش تفاوت‌ها.</li>
+<li><b>ابزار Access Condition</b> — رمزگشایی/رمزگذاری بیت‌های دسترسی sector trailer و بلوک‌های داده.</li>
+<li><b>ابزار Value Block</b> — رمزگشایی/رمزگذاری value block به‌صورت عدد صحیح.</li>
+<li><b>محاسبه‌گر BCC</b> — محاسبه‌ی بایت BCC بلوک ۰.</li>
+<li><b>گزارش UID</b> — تاریخچه‌ی UIDهای دیده‌شده توسط برنامه.</li>
+<li><b>تبدیل داده</b> — تبدیل بین hex/bin/dec/ASCII.</li>
+<li><b>Import/Export</b> — تبدیل دامپ/کلید بین فرمت‌ها
+(.mct, .keys, .bin/.mfd/.dump, .eml, .json) و پشتیبان/بازیابی.</li>
+</ul>
+</div>
+
+<!-- ================= BRUTE FORCE ================= -->
+<h2 class="en">5. Brute Force Keys</h2>
+<h2 class="fa">۵. Brute Force کلیدها</h2>
+<div class="en">
+<p>Tries every key in a bounded range (or every key in selected key files)
+against the sectors you choose, shows the keys that work and saves them to a
+<code>.keys</code> file.</p>
+<h3>Settings</h3>
+<ul>
+<li><b>Key Source</b> — <i>Key Range</i>: enter start/end as hex keys (up to 12
+digits, e.g. <code>000000000000</code>–<code>000000000059</code>).
+<i>Key File</i>: pick one or more <code>.keys</code> files (tap "Choose Key File"
+several times to add more; long-press the file list to clear it).</li>
+<li><b>Key Type</b> — test Key A, Key B, or both.</li>
+<li><b>Keys/sec</b> — limits how many keys are tried per second.
+<b>0 = maximum speed</b>. Lower values reduce NFC/phone load and heat.</li>
+<li><b>Sectors</b> —
+  <ul>
+  <li><i>All sectors</i> — every sector of the tag.</li>
+  <li><i>Range</i> — a contiguous sector range (From–To).</li>
+  <li><i>Pick sectors</i> — tick individual sectors (0–39), e.g. 1, 2, 3, 7, 9.
+  Only the ticked sectors are tested — gaps are skipped.</li>
+  </ul>
+  In <i>Pick sectors</i> mode, <b>long-press a sector</b> to cycle its key type:
+  Both → Key A → Key B → Both (the letter appears next to the sector number).</li>
+</ul>
+<h3>During the scan</h3>
+<ul>
+<li>The status line shows the current sector, key index and number of keys found.</li>
+<li>Every sector that yields keys is appended to the <b>Found keys</b> log
+(<code>S07 A=… B=…</code>).</li>
+<li><b>Pause</b> suspends the scan instantly (works even inside a sector);
+<b>Resume</b> continues.</li>
+<li><b>Cancel</b> aborts the scan.</li>
+</ul>
+<h3>If the tag disconnects</h3>
+<div class="note">Keys found so far are kept in memory. A dialog offers:
+<b>Resume scan</b> (waits for the tag, reconnects and continues with the
+remaining sectors — finished sectors are not retested), <b>Save keys</b> or
+<b>Discard</b>.</div>
+<h3>After the scan</h3>
+<p>You are asked for an output file name <b>before</b> scanning starts.
+Empty = <code>new</code>; if the file exists the app uses
+<code>new1</code>, <code>new2</code>, … Found keys are shown and saved as
+<code>.keys</code>.</p>
+<div class="warn">Brute force on a large range takes a long time — each key
+needs an NFC authentication. Use a small range or a low Keys/sec value on hot
+devices.</div>
+</div>
+<div class="fa">
+<p>هر کلید داخل یک بازه‌ی محدود (یا هر کلید داخل فایل‌های کلید انتخابی) را روی
+سکتورهایی که انتخاب می‌کنید امتحان می‌کند، کلیدهای درست را نشان می‌دهد و در یک
+فایل <code>.keys</code> ذخیره می‌کند.</p>
+<h3>تنظیمات</h3>
+<ul>
+<li><b>منبع کلید</b> — <i>بازه‌ی عددی</i>: ابتدا و انتها را به‌صورت کلید هگز وارد کنید
+(حداکثر ۱۲ رقم، مثلاً <code>000000000000</code> تا <code>000000000059</code>).
+<i>فایل کلید</i>: یک یا چند فایل <code>.keys</code> انتخاب کنید (برای افزودن فایل
+بیشتر چند بار «انتخاب فایل کلید» را بزنید؛ long-press روی لیست فایل‌ها آن را پاک می‌کند).</li>
+<li><b>نوع کلید</b> — تست Key A، Key B یا هر دو.</li>
+<li><b>کلید در ثانیه</b> — محدودیت تعداد کلیدهای تست‌شده در ثانیه.
+<b>۰ = حداکثر سرعت</b>. مقادیر کمتر بار NFC و گرم شدن گوشی را کم می‌کنند.</li>
+<li><b>سکتورها</b> —
+  <ul>
+  <li><i>همه سکتورها</i> — همه‌ی سکتورهای تگ.</li>
+  <li><i>بازه</i> — یک بازه‌ی پیوسته‌ی سکتور (از–تا).</li>
+  <li><i>انتخاب سکتور</i> — تیک زدن سکتورهای تکی (۰ تا ۳۹)، مثلاً ۱، ۲، ۳، ۷، ۹.
+  فقط سکتورهای تیک‌خورده تست می‌شوند — شکاف‌ها رد می‌شوند.</li>
+  </ul>
+  در حالت <i>انتخاب سکتور</i>، <b>long-press روی یک سکتور</b> نوع کلیدش را می‌چرخاند:
+  هر دو → Key A → Key B → هر دو (حرف کنار شماره‌ی سکتور دیده می‌شود).</li>
+</ul>
+<h3>حین اسکن</h3>
+<ul>
+<li>خط وضعیت، سکتور فعلی، ایندکس کلید و تعداد کلیدهای پیداشده را نشان می‌دهد.</li>
+<li>هر سکتوری که کلید بدهد در لاگ <b>کلیدهای پیداشده</b> اضافه می‌شود
+(<code>S07 A=… B=…</code>).</li>
+<li><b>توقف</b> اسکن را فوراً معلق می‌کند (حتی داخل یک سکتور هم کار می‌کند)؛
+<b>ادامه</b> آن را از سر می‌گیرد.</li>
+<li><b>لغو</b> اسکن را متوقف می‌کند.</li>
+</ul>
+<h3>اگر تگ قطع شود</h3>
+<div class="note">کلیدهای پیداشده تا آن لحظه در حافظه می‌مانند. یک دیالوگ پیشنهاد
+می‌دهد: <b>ادامه اسکن</b> (در انتظار تگ می‌ماند، وصل می‌شود و فقط سکتورهای
+باقی‌مانده را ادامه می‌دهد — سکتورهای تمام‌شده دوباره تست نمی‌شوند)،
+<b>ذخیره کلیدها</b> یا <b>صرف‌نظر</b>.</div>
+<h3>بعد از اسکن</h3>
+<p>قبل از شروع اسکن نام فایل خروجی پرسیده می‌شود.
+خالی = <code>new</code>؛ اگر فایل وجود داشته باشد برنامه
+<code>new1</code>، <code>new2</code> و… استفاده می‌کند. کلیدهای پیداشده نمایش داده
+و به‌صورت <code>.keys</code> ذخیره می‌شوند.</p>
+<div class="warn">Brute Force روی بازه‌ی بزرگ زمان زیادی می‌برد — برای هر کلید
+یک احراز هویت NFC لازم است. روی دستگاه‌های داغ از بازه‌ی کوچک یا مقدار کم
+Keys/sec استفاده کنید.</div>
+</div>
+
+<!-- ================= PREFERENCES ================= -->
+<h2 class="en">6. Preferences</h2>
+<h2 class="fa">۶. تنظیمات</h2>
+<div class="en">
+<ul>
+<li><b>Language</b> — switch between English, فارسی and other languages. Applies
+immediately.</li>
+<li><b>Theme</b> — dark / light / follow system.</li>
+<li><b>Autostart if tag detected</b> — starts the app automatically when a
+MIFARE Classic tag is presented.</li>
+<li><b>Retry authentication</b> — retries failed authentications (helps some
+tags/devices, slows operations).</li>
+<li><b>Auto reconnect</b> — reconnects automatically if the tag is lost during
+key mapping.</li>
+<li><b>Custom sector count</b> — override the detected sector count (e.g. 16 for
+1K tags).</li>
+</ul>
+</div>
+<div class="fa">
+<ul>
+<li><b>زبان</b> — تغییر بین English، فارسی و زبان‌های دیگر. بلافاصله اعمال می‌شود.</li>
+<li><b>تم</b> — تیره / روشن / مطابق سیستم.</li>
+<li><b>اجرای خودکار با شناسایی تگ</b> — با نزدیک کردن تگ MIFARE Classic برنامه خودکار اجرا می‌شود.</li>
+<li><b>تلاش مجدد احراز هویت</b> — تلاش مجدد احرازهای ناموفق (به بعضی تگ‌ها/دستگاه‌ها کمک می‌کند، عملیات را کند می‌کند).</li>
+<li><b>اتصال مجدد خودکار</b> — اتصال خودکار اگر تگ در حین نگاشت کلید گم شود.</li>
+<li><b>تعداد سکتور سفارشی</b> — بازنویسی تعداد سکتور شناسایی‌شده (مثلاً ۱۶ برای تگ 1K).</li>
+</ul>
+</div>
+
+<h2 class="en">7. Notes &amp; Warnings</h2>
+<h2 class="fa">۷. نکات و هشدارها</h2>
+<div class="en">
+<ul>
+<li>Keep the tag steady and close to the antenna area during operations.</li>
+<li>Never write to sector trailers or block 0 unless you know exactly what you
+do — wrong access conditions can permanently lock a tag.</li>
+<li>Standard keys (<code>FFFFFFFFFFFF</code>, <code>000000000000</code>, …) are
+tested first for speed.</li>
+<li>For Crypto1 attacks (nested/darkside) a Proxmark3 or similar hardware is
+required — this app works through the standard Android NFC API only.</li>
+</ul>
+</div>
+<div class="fa">
+<ul>
+<li>در حین عملیات تگ را ثابت و نزدیک ناحیه‌ی آنتن نگه دارید.</li>
+<li>هرگز روی sector trailer یا بلوک ۰ ننویسید مگر اینکه دقیقاً بدانید چه می‌کنید —
+access condition اشتباه می‌تواند تگ را برای همیشه قفل کند.</li>
+<li>کلیدهای استاندارد (<code>FFFFFFFFFFFF</code>، <code>000000000000</code>، …) برای
+سرعت اول تست می‌شوند.</li>
+<li>برای حملات Crypto1 (nested/darkside) سخت‌افزار Proxmark3 یا مشابه لازم است —
+این برنامه فقط از API استاندارد NFC اندروید استفاده می‌کند.</li>
+</ul>
+</div>
+
+<script>
+function setLang(l) {
+  document.body.className = 'lang-' + l;
+  document.getElementById('btnEn').className = l === 'en' ? 'active' : '';
+  document.getElementById('btnFa').className = l === 'fa' ? 'active' : '';
+}
+(function () {
+  var l = (navigator.language || 'en').toLowerCase().indexOf('fa') === 0 ? 'fa' : 'en';
+  setLang(l);
+})();
+</script>
+</body>
+</html>
