@@ -87,6 +87,8 @@ public class BruteForce extends BasicActivity {
     private RadioGroup mKeySourceGroup;
     private AppCompatEditText mKeyRangeFrom;
     private AppCompatEditText mKeyRangeTo;
+    private AppCompatEditText mKeysPerSecond;
+    private int mKeysPerSecondVal = 0;
     private LinearLayout mKeyRangeLayout;
     private LinearLayout mKeyFileLayout;
     private Button mChooseKeyFile;
@@ -150,6 +152,7 @@ public class BruteForce extends BasicActivity {
         mKeySourceGroup = findViewById(R.id.radioGroupBruteForceKeySource);
         mKeyRangeFrom = findViewById(R.id.editTextBruteForceKeyRangeFrom);
         mKeyRangeTo = findViewById(R.id.editTextBruteForceKeyRangeTo);
+        mKeysPerSecond = findViewById(R.id.editTextBruteForceKeysPerSecond);
         mKeyRangeLayout = findViewById(R.id.linearLayoutBruteForceKeyRange);
         mKeyFileLayout = findViewById(R.id.linearLayoutBruteForceKeyFile);
         mChooseKeyFile = findViewById(R.id.buttonBruteForceChooseKeyFile);
@@ -342,6 +345,13 @@ public class BruteForce extends BasicActivity {
         mKeySource = getKeySourceMode();
         mSectorMode = getSectorMode();
         mAuthMode = getSelectedKeyMapAuthMode();
+        mKeysPerSecondVal = parseKeysPerSecondLocal(
+                mKeysPerSecond.getText().toString());
+        if (mKeysPerSecondVal < 0) {
+            Toast.makeText(this, R.string.info_invalid_key_range,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (mKeySource == KEY_SOURCE_FILE && mKeyFiles.isEmpty()) {
             Toast.makeText(this, R.string.info_select_key_file,
@@ -481,6 +491,7 @@ public class BruteForce extends BasicActivity {
             return false;
         }
         reader.setKeyMapAuthMode(mAuthMode);
+        reader.setKeyMapKeysPerSecond(mKeysPerSecondVal);
         return reader.setMappingSectors(pendingSectorsArray(),
                 pendingModesArray());
     }
@@ -871,6 +882,7 @@ public class BruteForce extends BasicActivity {
         editor.putInt("authMode", mAuthMode);
         editor.putInt("keySource", mKeySource);
         editor.putInt("sectorMode", mSectorMode);
+        editor.putInt("keysPerSecond", mKeysPerSecondVal);
         editor.putInt("sectorFrom", mFirstSector);
         editor.putInt("sectorTo", mLastSector);
         long mask = 0;
@@ -919,6 +931,10 @@ public class BruteForce extends BasicActivity {
         ((RadioButton) findViewById(sectorId)).setChecked(true);
         onSectorModeChanged(null);
 
+        mKeysPerSecondVal = prefs.getInt("keysPerSecond", 0);
+        if (mKeysPerSecondVal > 0) {
+            mKeysPerSecond.setText(String.valueOf(mKeysPerSecondVal));
+        }
         mSectorFrom.setText(String.valueOf(prefs.getInt("sectorFrom", 0)));
         mSectorTo.setText(String.valueOf(prefs.getInt("sectorTo", 0)));
 
@@ -947,6 +963,18 @@ public class BruteForce extends BasicActivity {
         }
         try {
             return Long.parseLong(hex, 16);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static int parseKeysPerSecondLocal(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return 0;
+        }
+        try {
+            int value = Integer.parseInt(text.trim());
+            return value >= 0 ? value : -1;
         } catch (NumberFormatException e) {
             return -1;
         }

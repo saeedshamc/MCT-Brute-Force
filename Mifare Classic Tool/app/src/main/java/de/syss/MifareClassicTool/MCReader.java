@@ -80,6 +80,7 @@ public class MCReader {
     private int mMappingSectorIndex = 0;
     private int[] mMappingSectorModes = null;
     private volatile boolean mKeyMapPaused = false;
+    private volatile int mKeyMapKeysPerSecond = 0;
     private volatile int mKeyMapProgressSector = -1;
     private volatile long mKeyMapProgressKey = -1;
     private volatile long mKeyMapProgressKeyTotal = -1;
@@ -531,6 +532,7 @@ public class MCReader {
 
             // Check next sector against all keys (lines) with
             // authentication method A and B.
+            long keyPaceStartNanos = System.nanoTime();
             keysloop:
             for (long i = 0; i < keyCount; i++) {
                 while (mKeyMapPaused && !cancelCreateKeyMap) {
@@ -542,6 +544,12 @@ public class MCReader {
                 }
                 if (cancelCreateKeyMap) {
                     return -1;
+                }
+                if (mKeyMapKeysPerSecond > 0 && i > 0) {
+                    paceKeyLoop(i, keyPaceStartNanos);
+                    if (cancelCreateKeyMap) {
+                        return -1;
+                    }
                 }
                 mKeyMapProgressKey = i;
                 String key = mUseKeyRange
@@ -747,6 +755,35 @@ public class MCReader {
      */
     public void setKeyMapPaused(boolean paused) {
         mKeyMapPaused = paused;
+    }
+
+    /**
+     * Limit the key test rate of {@link #buildNextKeyMapPart()}.
+     * @param keysPerSecond Maximum number of keys tried per second.
+     * 0 means no limit (maximum speed).
+     * @return True if the value was valid. False otherwise.
+     */
+    public boolean setKeyMapKeysPerSecond(int keysPerSecond) {
+        if (keysPerSecond < 0) {
+            return false;
+        }
+        mKeyMapKeysPerSecond = keysPerSecond;
+        return true;
+    }
+
+    private void paceKeyLoop(long keyIndex, long startNanos) {
+        double expectedMs = keyIndex * 1000.0 / mKeyMapKeysPerSecond;
+        long elapsedMs = (System.nanoTime() - startNanos) / 1000000;
+        long sleepMs = (long) (expectedMs - elapsedMs);
+        while (sleepMs > 0 && !cancelCreateKeyMap) {
+            long chunk = Math.min(sleepMs, 200);
+            try {
+                Thread.sleep(chunk);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
+            sleepMs -= chunk;
+        }
     }
 
     /**
