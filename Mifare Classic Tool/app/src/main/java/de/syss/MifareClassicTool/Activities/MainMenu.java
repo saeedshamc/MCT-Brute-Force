@@ -925,6 +925,10 @@ public class MainMenu extends AppCompatActivity {
             intent = new Intent(this, DataConversionTool.class);
             startActivity(intent);
             return true;
+        } else if (id == R.id.menuMainBruteForce) {
+            intent = new Intent(this, BruteForce.class);
+            startActivity(intent);
+            return true;
         }
         return super.onContextItemSelected(item);
     }

@@ -211,6 +211,12 @@
             android:icon="@drawable/hex_to_ascii"
             android:label="@string/title_activity_data_conversion_tool" >
         </activity>
+        <activity
+            android:name=".Activities.BruteForce"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:icon="@drawable/map_keys_to_sector"
+            android:label="@string/title_activity_brute_force" >
+        </activity>
 
     </application>
 

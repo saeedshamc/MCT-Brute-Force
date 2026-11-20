@@ -28,9 +28,115 @@
     android:orientation="horizontal" >
 
     <LinearLayout
+        android:id="@+id/linearLayoutCreateKeyMapBruteForce"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_bruteforce"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/text_key_type"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupCreateKeyMapKeyType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/radioButtonCreateKeyMapKeyTypeBoth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/text_key_type_both" />
+
+            <RadioButton
+                android:id="@+id/radioButtonCreateKeyMapKeyTypeA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_key_type_a" />
+
+            <RadioButton
+                android:id="@+id/radioButtonCreateKeyMapKeyTypeB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_key_type_b" />
+
+        </RadioGroup>
+
+        <androidx.appcompat.widget.AppCompatCheckBox
+            android:id="@+id/checkBoxCreateKeyMapUseKeyRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:onClick="onUseKeyRangeChanged"
+            android:text="@string/text_use_key_range" />
+
+        <LinearLayout
+            android:id="@+id/linearLayoutCreateKeyMapKeyRange"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/text_key_range_from" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/editTextCreateKeyMapKeyRangeFrom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:digits="0123456789ABCDEFabcdef"
+                android:inputType="text"
+                android:maxLength="12"
+                android:singleLine="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/text_key_range_to" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/editTextCreateKeyMapKeyRangeTo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_weight="1"
+                android:digits="0123456789ABCDEFabcdef"
+                android:inputType="text"
+                android:maxLength="12"
+                android:singleLine="true" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearLayoutCreateKeyMap"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayoutCreateKeyMapBruteForce" >
 
         <TextView
             android:id="@+id/textViewCreateKeyMapSectorRange"

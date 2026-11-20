@@ -58,12 +58,29 @@ public class MCReader {
      */
     public static final String DEFAULT_KEY = "FFFFFFFFFFFF";
 
+    /**
+     * Try Key A and Key B while creating a key map.
+     */
+    public static final int KEY_MAP_MODE_BOTH = 0;
+    /**
+     * Only try Key A while creating a key map.
+     */
+    public static final int KEY_MAP_MODE_KEY_A = 1;
+    /**
+     * Only try Key B while creating a key map.
+     */
+    public static final int KEY_MAP_MODE_KEY_B = 2;
+
     private final MifareClassic mMFC;
     private SparseArray<byte[][]> mKeyMap = new SparseArray<>();
     private int mKeyMapStatus = 0;
     private int mLastSector = -1;
     private int mFirstSector = 0;
     private ArrayList<String> mKeysWithOrder;
+    private int mKeyMapAuthMode = KEY_MAP_MODE_BOTH;
+    private boolean mUseKeyRange = false;
+    private long mKeyRangeStart = 0;
+    private long mKeyRangeEnd = -1;
     private boolean mHasAllZeroKey = false;
     private boolean cancelCreateKeyMap = false;
 
@@ -466,7 +483,8 @@ public class MCReader {
         // Clear status and key map before new walk through sectors.
         boolean error = false;
         cancelCreateKeyMap = false;
-        if (mKeysWithOrder != null && mLastSector != -1) {
+        boolean hasKeyCandidates = mUseKeyRange || mKeysWithOrder != null;
+        if (hasKeyCandidates && mLastSector != -1) {
             if (mKeyMapStatus == mLastSector+1) {
                 mKeyMapStatus = mFirstSector;
                 mKeyMap = new SparseArray<>();
@@ -484,19 +502,26 @@ public class MCReader {
             String[] keys = new String[2];
             boolean[] foundKeys = new boolean[] {false, false};
             boolean auth;
+            boolean tryKeyA = mKeyMapAuthMode != KEY_MAP_MODE_KEY_B;
+            boolean tryKeyB = mKeyMapAuthMode != KEY_MAP_MODE_KEY_A;
+            long keyCount = mUseKeyRange
+                    ? mKeyRangeEnd - mKeyRangeStart + 1
+                    : mKeysWithOrder.size();
 
             // Check next sector against all keys (lines) with
             // authentication method A and B.
             keysloop:
-            for (int i = 0; i < mKeysWithOrder.size(); i++) {
-                String key = mKeysWithOrder.get(i);
+            for (long i = 0; i < keyCount; i++) {
+                String key = mUseKeyRange
+                        ? keyHexFromLong(mKeyRangeStart + i)
+                        : mKeysWithOrder.get((int) i);
                 byte[] bytesKey = Common.hex2Bytes(key);
                 for (int j = 0; j < retryAuthCount+1;) {
                     try {
                         if (cancelCreateKeyMap) {
                             return -1;
                         }
-                        if (!foundKeys[0]) {
+                        if (tryKeyA && !foundKeys[0]) {
                             auth = mMFC.authenticateSectorWithKeyA(
                                     mKeyMapStatus, bytesKey);
                             if (auth) {
@@ -504,7 +529,7 @@ public class MCReader {
                                 foundKeys[0] = true;
                             }
                         }
-                        if (!foundKeys[1]) {
+                        if (tryKeyB && !foundKeys[1]) {
                             auth = mMFC.authenticateSectorWithKeyB(
                                     mKeyMapStatus, bytesKey);
                             if (auth) {
@@ -542,15 +567,16 @@ public class MCReader {
                         }
                     }
                     // Retry?
-                    if((foundKeys[0] && foundKeys[1]) || !retryAuth) {
-                        // Both keys found or no retry wanted. Stop retrying.
+                    if (isKeyMapSearchComplete(foundKeys) || !retryAuth) {
+                        // All wanted keys found or no retry wanted.
+                        // Stop retrying.
                         break;
                     }
                     j++;
                 }
                 // Next key?
-                if ((foundKeys[0] && foundKeys[1])) {
-                    // Both keys found. Stop searching for keys.
+                if (isKeyMapSearchComplete(foundKeys)) {
+                    // All wanted keys found. Stop searching for keys.
                     break;
                 }
             }
@@ -566,7 +592,7 @@ public class MCReader {
                 // is a all-0 key in the key file, because of a bug in
                 // some tags and/or devices.
                 // https://github.com/ikarus23/MifareClassicTool/issues/66
-                if (mKeysWithOrder.size() > 2) {
+                if (!mUseKeyRange && mKeysWithOrder.size() > 2) {
                     if (foundKeys[0]) {
                         mKeysWithOrder.remove(keys[0]);
                         if (mHasAllZeroKey && !keys[0].equals(DEFAULT_KEY)) {
@@ -596,6 +622,81 @@ public class MCReader {
             return -1;
         }
         return mKeyMapStatus - 1;
+    }
+
+    /**
+     * Set which key type(s) {@link #buildNextKeyMapPart()} should try.
+     * @param mode One of {@link #KEY_MAP_MODE_BOTH}, {@link #KEY_MAP_MODE_KEY_A}
+     * or {@link #KEY_MAP_MODE_KEY_B}.
+     * @return True if the mode was valid. False otherwise.
+     */
+    public boolean setKeyMapAuthMode(int mode) {
+        if (mode == KEY_MAP_MODE_BOTH || mode == KEY_MAP_MODE_KEY_A
+                || mode == KEY_MAP_MODE_KEY_B) {
+            mKeyMapAuthMode = mode;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Set a numeric key range for {@link #buildNextKeyMapPart()}.
+     * Start and end are hexadecimal key values (up to 12 hex digits).
+     * @param startHex First key to try (inclusive).
+     * @param endHex Last key to try (inclusive).
+     * @return True if the range was valid. False otherwise.
+     */
+    public boolean setKeyRange(String startHex, String endHex) {
+        long start = parseKeyHex(startHex);
+        long end = parseKeyHex(endHex);
+        if (start < 0 || end < start) {
+            return false;
+        }
+        mKeyRangeStart = start;
+        mKeyRangeEnd = end;
+        mUseKeyRange = true;
+        mKeysWithOrder = null;
+        return true;
+    }
+
+    /**
+     * Get the number of keys in the range set by {@link #setKeyRange(String, String)}.
+     * @return Number of candidate keys or -1 if no key range is active.
+     */
+    public long getKeyRangeSize() {
+        if (!mUseKeyRange) {
+            return -1;
+        }
+        return mKeyRangeEnd - mKeyRangeStart + 1;
+    }
+
+    private static long parseKeyHex(String hex) {
+        if (hex == null) {
+            return -1;
+        }
+        hex = hex.trim();
+        if (hex.isEmpty() || hex.length() > 12
+                || !hex.matches("[0-9A-Fa-f]+")) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(hex, 16);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static String keyHexFromLong(long value) {
+        return String.format("%012X", value);
+    }
+
+    private boolean isKeyMapSearchComplete(boolean[] foundKeys) {
+        if (mKeyMapAuthMode == KEY_MAP_MODE_KEY_A) {
+            return foundKeys[0];
+        } else if (mKeyMapAuthMode == KEY_MAP_MODE_KEY_B) {
+            return foundKeys[1];
+        }
+        return foundKeys[0] && foundKeys[1];
     }
 
     /**
@@ -888,6 +989,7 @@ public class MCReader {
      * @return Number of keys loaded. -1 on error.
      */
     public int setKeyFile(File[] keyFiles, Context context) {
+        mUseKeyRange = false;
         if (keyFiles == null || keyFiles.length == 0 || context == null) {
             return -1;
         }
