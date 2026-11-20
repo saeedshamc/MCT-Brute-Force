@@ -78,6 +78,11 @@ public class MCReader {
     private int mFirstSector = 0;
     private int[] mMappingSectorList = null;
     private int mMappingSectorIndex = 0;
+    private int[] mMappingSectorModes = null;
+    private volatile boolean mKeyMapPaused = false;
+    private volatile int mKeyMapProgressSector = -1;
+    private volatile long mKeyMapProgressKey = -1;
+    private volatile long mKeyMapProgressKeyTotal = -1;
     private ArrayList<String> mKeysWithOrder;
     private int mKeyMapAuthMode = KEY_MAP_MODE_BOTH;
     private boolean mUseKeyRange = false;
@@ -511,16 +516,34 @@ public class MCReader {
             String[] keys = new String[2];
             boolean[] foundKeys = new boolean[] {false, false};
             boolean auth;
-            boolean tryKeyA = mKeyMapAuthMode != KEY_MAP_MODE_KEY_B;
-            boolean tryKeyB = mKeyMapAuthMode != KEY_MAP_MODE_KEY_A;
+            int sectorAuthMode = mKeyMapAuthMode;
+            if (mMappingSectorModes != null) {
+                sectorAuthMode = mMappingSectorModes[mMappingSectorIndex - 1];
+            }
+            boolean tryKeyA = sectorAuthMode != KEY_MAP_MODE_KEY_B;
+            boolean tryKeyB = sectorAuthMode != KEY_MAP_MODE_KEY_A;
             long keyCount = mUseKeyRange
                     ? mKeyRangeEnd - mKeyRangeStart + 1
                     : mKeysWithOrder.size();
+            mKeyMapProgressSector = mKeyMapStatus;
+            mKeyMapProgressKey = -1;
+            mKeyMapProgressKeyTotal = keyCount;
 
             // Check next sector against all keys (lines) with
             // authentication method A and B.
             keysloop:
             for (long i = 0; i < keyCount; i++) {
+                while (mKeyMapPaused && !cancelCreateKeyMap) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        // Do nothing.
+                    }
+                }
+                if (cancelCreateKeyMap) {
+                    return -1;
+                }
+                mKeyMapProgressKey = i;
                 String key = mUseKeyRange
                         ? keyHexFromLong(mKeyRangeStart + i)
                         : mKeysWithOrder.get((int) i);
@@ -576,7 +599,8 @@ public class MCReader {
                         }
                     }
                     // Retry?
-                    if (isKeyMapSearchComplete(foundKeys) || !retryAuth) {
+                    if (isKeyMapSearchComplete(foundKeys, sectorAuthMode)
+                            || !retryAuth) {
                         // All wanted keys found or no retry wanted.
                         // Stop retrying.
                         break;
@@ -584,7 +608,7 @@ public class MCReader {
                     j++;
                 }
                 // Next key?
-                if (isKeyMapSearchComplete(foundKeys)) {
+                if (isKeyMapSearchComplete(foundKeys, sectorAuthMode)) {
                     // All wanted keys found. Stop searching for keys.
                     break;
                 }
@@ -704,12 +728,51 @@ public class MCReader {
     }
 
     private boolean isKeyMapSearchComplete(boolean[] foundKeys) {
-        if (mKeyMapAuthMode == KEY_MAP_MODE_KEY_A) {
+        return isKeyMapSearchComplete(foundKeys, mKeyMapAuthMode);
+    }
+
+    private boolean isKeyMapSearchComplete(boolean[] foundKeys, int mode) {
+        if (mode == KEY_MAP_MODE_KEY_A) {
             return foundKeys[0];
-        } else if (mKeyMapAuthMode == KEY_MAP_MODE_KEY_B) {
+        } else if (mode == KEY_MAP_MODE_KEY_B) {
             return foundKeys[1];
         }
         return foundKeys[0] && foundKeys[1];
+    }
+
+    /**
+     * Pause or resume {@link #buildNextKeyMapPart()} while it is checking
+     * keys. While paused the method sleeps and does not authenticate.
+     * @param paused True to pause, false to resume.
+     */
+    public void setKeyMapPaused(boolean paused) {
+        mKeyMapPaused = paused;
+    }
+
+    /**
+     * Get the sector currently checked by {@link #buildNextKeyMapPart()}.
+     * @return Sector index or -1 if no key map is in progress.
+     */
+    public int getKeyMapProgressSector() {
+        return mKeyMapProgressSector;
+    }
+
+    /**
+     * Get the index of the key currently tried by
+     * {@link #buildNextKeyMapPart()} within the current sector.
+     * @return Key index or -1 if no key is being tried right now.
+     */
+    public long getKeyMapProgressKey() {
+        return mKeyMapProgressKey;
+    }
+
+    /**
+     * Get the total number of candidate keys per sector used by
+     * {@link #buildNextKeyMapPart()}.
+     * @return Number of candidate keys or -1 if no key map is in progress.
+     */
+    public long getKeyMapProgressKeyTotal() {
+        return mKeyMapProgressKeyTotal;
     }
 
     /**
@@ -1051,6 +1114,7 @@ public class MCReader {
         if (firstSector >= 0 && lastSector < getSectorCount()
                 && firstSector <= lastSector) {
             mMappingSectorList = null;
+            mMappingSectorModes = null;
             mFirstSector = firstSector;
             mLastSector = lastSector;
             // Init. status of buildNextKeyMapPart to create a new key map.
@@ -1068,18 +1132,62 @@ public class MCReader {
      * @see #setMappingRange(int, int)
      */
     public boolean setMappingSectors(int[] sectors) {
-        if (sectors == null || sectors.length == 0) {
+        return setMappingSectors(sectors, null);
+    }
+
+    /**
+     * Set an arbitrary list of sectors for {@link #buildNextKeyMapPart()}
+     * with an optional per-sector key type mode.
+     * The sectors do not need to be contiguous.
+     * @param sectors Sector indices to include in the key map.
+     * @param modes Optional array (same length as sectors) with one of
+     * {@link #KEY_MAP_MODE_BOTH}, {@link #KEY_MAP_MODE_KEY_A} or
+     * {@link #KEY_MAP_MODE_KEY_B} per sector. If null,
+     * {@link #setKeyMapAuthMode(int)} applies to all sectors.
+     * @return True if parameters were correct. False otherwise.
+     * @see #setMappingRange(int, int)
+     */
+    public boolean setMappingSectors(int[] sectors, int[] modes) {
+        if (sectors == null || sectors.length == 0
+                || (modes != null && modes.length != sectors.length)) {
             return false;
         }
         int[] sorted = sectors.clone();
-        Arrays.sort(sorted);
+        int[] sortedModes = modes == null ? null : modes.clone();
+        if (sortedModes != null) {
+            // Sort sectors and modes together by sector index.
+            Integer[] order = new Integer[sorted.length];
+            for (int i = 0; i < order.length; i++) {
+                order[i] = i;
+            }
+            final int[] sectorRef = sorted;
+            Arrays.sort(order, (a, b) -> Integer.compare(
+                    sectorRef[a], sectorRef[b]));
+            int[] s = new int[sorted.length];
+            int[] m = new int[sorted.length];
+            for (int i = 0; i < order.length; i++) {
+                s[i] = sorted[order[i]];
+                m[i] = sortedModes[order[i]];
+            }
+            sorted = s;
+            sortedModes = m;
+        } else {
+            Arrays.sort(sorted);
+        }
         for (int i = 0; i < sorted.length; i++) {
             if (sorted[i] < 0 || sorted[i] >= getSectorCount()
                     || (i > 0 && sorted[i] == sorted[i - 1])) {
                 return false;
             }
+            if (sortedModes != null
+                    && sortedModes[i] != KEY_MAP_MODE_BOTH
+                    && sortedModes[i] != KEY_MAP_MODE_KEY_A
+                    && sortedModes[i] != KEY_MAP_MODE_KEY_B) {
+                return false;
+            }
         }
         mMappingSectorList = sorted;
+        mMappingSectorModes = sortedModes;
         mMappingSectorIndex = sorted.length;
         mFirstSector = sorted[0];
         mLastSector = sorted[sorted.length - 1];

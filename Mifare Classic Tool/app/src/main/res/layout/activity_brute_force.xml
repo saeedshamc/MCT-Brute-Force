@@ -96,6 +96,45 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
+                        android:text="@string/text_key_source" />
+
+                    <RadioGroup
+                        android:id="@+id/radioGroupBruteForceKeySource"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:orientation="horizontal" >
+
+                        <RadioButton
+                            android:id="@+id/radioButtonBruteForceKeySourceRange"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:onClick="onKeySourceChanged"
+                            android:text="@string/text_key_source_range" />
+
+                        <RadioButton
+                            android:id="@+id/radioButtonBruteForceKeySourceFile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:onClick="onKeySourceChanged"
+                            android:text="@string/text_key_source_file" />
+
+                    </RadioGroup>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayoutBruteForceKeyRange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:text="@string/text_key_range_from" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -126,6 +165,32 @@
                         android:inputType="text"
                         android:maxLength="12"
                         android:singleLine="true" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearLayoutBruteForceKeyFile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone" >
+
+                    <Button
+                        android:id="@+id/buttonBruteForceChooseKeyFile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onChooseKeyFile"
+                        android:text="@string/action_choose_key_file" />
+
+                    <TextView
+                        android:id="@+id/textViewBruteForceKeyFiles"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="8dp"
+                        android:layout_weight="1"
+                        android:text="" />
 
                 </LinearLayout>
 
@@ -225,6 +290,22 @@
                     android:orientation="vertical"
                     android:visibility="gone" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/text_found_keys_log" />
+
+                <TextView
+                    android:id="@+id/textViewBruteForceKeyLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:minHeight="48dp"
+                    android:text=""
+                    android:textIsSelectable="true" />
+
             </LinearLayout>
 
         </ScrollView>
@@ -260,6 +341,16 @@
                 android:layout_weight="1"
                 android:onClick="onStartBruteForce"
                 android:text="@string/action_start" />
+
+            <Button
+                android:id="@+id/buttonBruteForcePause"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="onPauseBruteForce"
+                android:text="@string/action_pause" />
 
             <Button
                 android:id="@+id/buttonBruteForceCancel"

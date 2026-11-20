@@ -99,6 +99,23 @@
     <string name="text_sectors">Sectors:</string>
     <string name="text_sector_mode_range">Range</string>
     <string name="text_sector_mode_pick">Pick sectors</string>
+    <string name="text_sector_pick_hint">Tip: long-press a sector to cycle Key A / Key B / Both</string>
+    <string name="text_key_source">Key Source:</string>
+    <string name="text_key_source_range">Key Range</string>
+    <string name="text_key_source_file">Key File</string>
+    <string name="action_choose_key_file">Choose Key File</string>
+    <string name="text_key_files_selected">%1$d file(s):</string>
+    <string name="info_select_key_file">Please select at least one key file</string>
+    <string name="text_found_keys_log">Found keys:</string>
+    <string name="text_key_log_line">S%1$02d  A=%2$s  B=%3$s</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_resume_scan">Resume scan</string>
+    <string name="action_discard">Discard</string>
+    <string name="info_brute_force_paused">Paused</string>
+    <string name="info_brute_force_progress">Sector %1$d · %2$d/%3$d sectors · key %4$d/%5$d · found %6$d</string>
+    <string name="dialog_tag_lost_title">Tag disconnected</string>
+    <string name="dialog_tag_lost_message">The tag disconnected. %1$d key(s) were found so far.</string>
     <string name="text_update_colors">Update Colors</string>
     <string name="text_data">Data</string>
     <string name="text_value">Value</string>
