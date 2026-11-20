@@ -101,6 +101,7 @@
     <string name="text_sector_mode_pick">Pick sectors</string>
     <string name="text_sector_pick_hint">Tip: long-press a sector to cycle Key A / Key B / Both</string>
     <string name="text_key_source">Key Source:</string>
+    <string name="text_keys_per_second">Keys/sec (0 = max speed):</string>
     <string name="text_key_source_range">Key Range</string>
     <string name="text_key_source_file">Key File</string>
     <string name="action_choose_key_file">Choose Key File</string>
@@ -748,6 +749,7 @@
         <item>Русский (ru)</item>
         <item>简体中文 (zh)</item>
         <item>正體中文 (zh-TW)</item>
+        <item>فارسی (fa)</item>
     </string-array>
 
 </resources>
