@@ -8,7 +8,7 @@ android {
     namespace "de.syss.MifareClassicTool"
 
     defaultConfig {
-        applicationId "de.syss.MifareClassicTool"
+        applicationId "com.mifare.ssh"
         minSdk 19
         targetSdk 35
         versionCode 71
