@@ -22,11 +22,11 @@
 <resources>
 
     <!-- Common stuff -->
-    <string name="app_name">MIFARE Classic Tool</string>
+    <string name="app_name">Mifare SSH</string>
     <string name="app_version">Versão</string>
 
     <!-- Activity titles -->
-    <string name="title_activity_main">MIFARE Classic Tool</string>
+    <string name="title_activity_main">Mifare SSH</string>
     <string name="title_activity_read_tag">Ler etiqueta</string>
     <string name="title_activity_dump_editor">Editor de dumps</string>
     <string name="title_activity_access_conditions">Condições de acesso</string>

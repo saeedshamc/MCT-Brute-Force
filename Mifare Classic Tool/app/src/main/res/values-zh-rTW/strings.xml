@@ -29,11 +29,11 @@
 
 
     <!-- Common stuff -->
-    <string name="app_name">MIFARE Classic Tool</string>
+    <string name="app_name">Mifare SSH</string>
     <string name="app_version">App 版本</string>
 
     <!-- Activity titles -->
-    <string name="title_activity_main">MIFARE Classic Tool</string>
+    <string name="title_activity_main">Mifare SSH</string>
     <string name="title_activity_read_tag">讀取標籤</string>
     <string name="title_activity_dump_editor">傾印編輯器</string>
     <string name="title_activity_access_conditions">存取條件</string>
